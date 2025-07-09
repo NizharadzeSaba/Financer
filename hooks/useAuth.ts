@@ -3,15 +3,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { authAPI, queryKeys, SignInRequest, SignUpRequest } from "../api";
 
-// ============================================================================
-// AUTH STATE HOOK
-// ============================================================================
-
 export const useAuthState = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasToken, setHasToken] = useState(false);
 
-  // Check for token on mount
   useEffect(() => {
     checkToken();
   }, []);
@@ -29,10 +24,6 @@ export const useAuthState = () => {
 
   return { isLoading, hasToken, setHasToken };
 };
-
-// ============================================================================
-// AUTH HOOKS
-// ============================================================================
 
 export const useProfile = (options?: {
   enabled?: boolean;

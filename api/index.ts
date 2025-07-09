@@ -92,6 +92,16 @@ const removeAuthToken = async (): Promise<void> => {
   }
 };
 
+const handleTokenInvalidation = async () => {
+  console.log("Token invalid, clearing auth data...");
+  await removeAuthToken();
+
+  queryClient.invalidateQueries({ queryKey: queryKeys.auth.all });
+  queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all });
+
+  queryClient.clear();
+};
+
 const apiFetch = async <T>(
   endpoint: string,
   options: RequestInit = {}
@@ -119,6 +129,11 @@ const apiFetch = async <T>(
     const response = await fetch(url, config);
 
     if (!response.ok) {
+      // Handle token invalidation for auth endpoints
+      if (response.status === 401 || response.status === 403) {
+        await handleTokenInvalidation();
+      }
+
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
         errorData.message || `HTTP error! status: ${response.status}`
@@ -161,6 +176,9 @@ export const authAPI = {
 
   logout: async (): Promise<void> => {
     await removeAuthToken();
+    queryClient.invalidateQueries({ queryKey: queryKeys.auth.all });
+    queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all });
+    queryClient.clear();
   },
 };
 
