@@ -1,9 +1,21 @@
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { useAuth } from "../../contexts/AuthContext";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useLogout, useProfile } from "../../hooks/useAuth";
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { data: user, isLoading, error, refetch } = useProfile();
+  const logoutMutation = useLogout();
+
+  const handleLogout = async () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => await logoutMutation.mutateAsync(),
+      },
+    ]);
+  };
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#f8fafc" }}>
@@ -27,13 +39,7 @@ export default function Profile() {
             marginBottom: 16,
           }}
         >
-          <Text
-            style={{
-              fontSize: 32,
-              fontWeight: "bold",
-              color: "#ffffff",
-            }}
-          >
+          <Text style={{ fontSize: 32, fontWeight: "bold", color: "#ffffff" }}>
             {user?.name?.charAt(0).toUpperCase() || "U"}
           </Text>
         </View>
@@ -48,6 +54,26 @@ export default function Profile() {
           {user?.name || "User"}
         </Text>
         <Text style={{ fontSize: 16, color: "#64748b" }}>{user?.email}</Text>
+        {user?.id && (
+          <Text style={{ fontSize: 12, color: "#9ca3af", marginTop: 4 }}>
+            ID: {user.id}
+          </Text>
+        )}
+
+        {/* Status indicators */}
+        <View style={{ marginTop: 16, flexDirection: "row", gap: 8 }}>
+          {isLoading && (
+            <Text style={{ fontSize: 12, color: "#3b82f6" }}>Loading...</Text>
+          )}
+          {error && (
+            <Text style={{ fontSize: 12, color: "#ef4444" }}>
+              Error loading profile
+            </Text>
+          )}
+          <TouchableOpacity onPress={() => refetch()}>
+            <Text style={{ fontSize: 12, color: "#10b981" }}>Refresh</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={{ marginTop: 20 }}>
@@ -393,6 +419,37 @@ export default function Profile() {
       </View>
 
       <View style={{ marginTop: 20, marginBottom: 60 }}>
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            backgroundColor: "#ffffff",
+            paddingHorizontal: 20,
+            paddingVertical: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: "#f3f4f6",
+          }}
+          onPress={handleLogout}
+        >
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#ef4444",
+            }}
+          >
+            Logout
+          </Text>
+          <Text
+            style={{
+              fontSize: 18,
+              color: "#9ca3af",
+            }}
+          >
+            ›
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={{
             flexDirection: "row",

@@ -1,15 +1,7 @@
 import MaterialCommunityIcons from "@expo/vector-icons/build/MaterialCommunityIcons";
 import { Tabs } from "expo-router";
-import { Text, TouchableOpacity } from "react-native";
-import { useAuth } from "../../contexts/AuthContext";
 
 export default function AppLayout() {
-  const { logout } = useAuth();
-
-  const handleLogout = async () => {
-    await logout();
-  };
-
   return (
     <Tabs
       screenOptions={{
@@ -19,11 +11,6 @@ export default function AppLayout() {
           backgroundColor: "#ffffff",
         },
         headerTintColor: "#1e293b",
-        headerRight: () => (
-          <TouchableOpacity onPress={handleLogout} style={{ marginRight: 16 }}>
-            <Text style={{ color: "#ef4444", fontSize: 16 }}>Logout</Text>
-          </TouchableOpacity>
-        ),
       }}
     >
       <Tabs.Screen

@@ -10,14 +10,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "../../contexts/AuthContext";
+import { useSignUp } from "../../hooks/useAuth";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const { register, isLoading } = useAuth();
+  const signUpMutation = useSignUp();
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
@@ -40,10 +40,10 @@ export default function Register() {
       return;
     }
 
-    const success = await register(email, password, name);
-    if (success) {
+    try {
+      await signUpMutation.mutateAsync({ email, password, name });
       router.replace("/(app)");
-    } else {
+    } catch (error) {
       Alert.alert("Error", "Registration failed. Please try again.");
     }
   };
@@ -210,14 +210,14 @@ export default function Register() {
 
           <TouchableOpacity
             style={{
-              backgroundColor: isLoading ? "#9ca3af" : "#3b82f6",
+              backgroundColor: signUpMutation.isPending ? "#9ca3af" : "#3b82f6",
               borderRadius: 12,
               paddingVertical: 16,
               alignItems: "center",
               marginBottom: 24,
             }}
             onPress={handleRegister}
-            disabled={isLoading}
+            disabled={signUpMutation.isPending}
           >
             <Text
               style={{
@@ -226,7 +226,9 @@ export default function Register() {
                 fontWeight: "600",
               }}
             >
-              {isLoading ? "Creating Account..." : "Create Account"}
+              {signUpMutation.isPending
+                ? "Creating Account..."
+                : "Create Account"}
             </Text>
           </TouchableOpacity>
 

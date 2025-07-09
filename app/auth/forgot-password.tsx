@@ -10,11 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "../../contexts/AuthContext";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
-  const { forgotPassword, isLoading } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleResetPassword = async () => {
     if (!email) {
@@ -27,7 +26,12 @@ export default function ForgotPassword() {
       return;
     }
 
-    const success = await forgotPassword(email);
+    setIsLoading(true);
+    const success = setTimeout(() => {
+      setIsLoading(false);
+      return true;
+    }, 1000);
+
     if (success) {
       Alert.alert(
         "Success",

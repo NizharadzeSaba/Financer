@@ -1,9 +1,9 @@
 import React from "react";
 import { ScrollView, Text, View } from "react-native";
-import { useAuth } from "../../contexts/AuthContext";
+import { useProfile } from "../../hooks/useAuth";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { data: user } = useProfile();
 
   return (
     <ScrollView style={{ flex: 1 }}>

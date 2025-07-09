@@ -10,12 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "../../contexts/AuthContext";
+import { useSignIn } from "../../hooks/useAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, isLoading } = useAuth();
+  const signInMutation = useSignIn();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -28,10 +28,10 @@ export default function Login() {
       return;
     }
 
-    const success = await login(email, password);
-    if (success) {
+    try {
+      await signInMutation.mutateAsync({ email, password });
       router.replace("/(app)");
-    } else {
+    } catch (error) {
       Alert.alert("Error", "Login failed. Please try again.");
     }
   };
@@ -158,14 +158,14 @@ export default function Login() {
 
           <TouchableOpacity
             style={{
-              backgroundColor: isLoading ? "#9ca3af" : "#3b82f6",
+              backgroundColor: signInMutation.isPending ? "#9ca3af" : "#3b82f6",
               borderRadius: 12,
               paddingVertical: 16,
               alignItems: "center",
               marginBottom: 24,
             }}
             onPress={handleLogin}
-            disabled={isLoading}
+            disabled={signInMutation.isPending}
           >
             <Text
               style={{
@@ -174,7 +174,7 @@ export default function Login() {
                 fontWeight: "600",
               }}
             >
-              {isLoading ? "Signing In..." : "Sign In"}
+              {signInMutation.isPending ? "Signing In..." : "Sign In"}
             </Text>
           </TouchableOpacity>
 
