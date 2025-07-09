@@ -45,6 +45,7 @@ export default function Register() {
       router.replace("/(app)");
     } catch (error) {
       Alert.alert("Error", "Registration failed. Please try again.");
+      console.log(error);
     }
   };
 
