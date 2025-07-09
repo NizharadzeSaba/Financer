@@ -52,7 +52,6 @@ export default function Transactions() {
         <RefreshControl refreshing={isFetching} onRefresh={refetch} />
       }
       onEndReached={() => {
-        console.log(hasNextPage);
         if (hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
