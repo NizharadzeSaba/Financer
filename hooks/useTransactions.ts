@@ -1,55 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CreateTransactionRequest, Transaction, queryKeys } from "../api";
-
-// ============================================================================
-// TRANSACTIONS API (Example)
-// ============================================================================
-
-const transactionsAPI = {
-  getTransactions: async (): Promise<Transaction[]> => {
-    // Simulate API call - replace with real endpoint
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return [
-      {
-        id: "1",
-        amount: 1000,
-        description: "Salary",
-        category: "Income",
-        date: new Date().toISOString(),
-        type: "income",
-      },
-      {
-        id: "2",
-        amount: 50,
-        description: "Grocery shopping",
-        category: "Food",
-        date: new Date().toISOString(),
-        type: "expense",
-      },
-    ];
-  },
-
-  createTransaction: async (
-    data: CreateTransactionRequest
-  ): Promise<Transaction> => {
-    // Simulate API call - replace with real endpoint
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return {
-      id: Date.now().toString(),
-      ...data,
-      date: new Date().toISOString(),
-    };
-  },
-};
+import { CreateTransactionRequest, queryKeys, transactionsAPI } from "../api";
 
 // ============================================================================
 // TRANSACTIONS HOOKS
 // ============================================================================
 
-export const useTransactions = () => {
+export const useTransactions = (page: number = 1) => {
   return useQuery({
     queryKey: queryKeys.transactions.lists(),
-    queryFn: transactionsAPI.getTransactions,
+    queryFn: () => transactionsAPI.getTransactions(page),
     staleTime: 2 * 60 * 1000,
   });
 };
@@ -63,8 +22,19 @@ export const useCreateTransaction = () => {
     onSuccess: (newTransaction) => {
       queryClient.setQueryData(
         queryKeys.transactions.lists(),
-        (oldData: Transaction[] | undefined) => {
-          return oldData ? [newTransaction, ...oldData] : [newTransaction];
+        (oldData: any) => {
+          if (!oldData)
+            return {
+              transactions: [newTransaction],
+              total: 1,
+              page: 1,
+              totalPages: 1,
+            };
+          return {
+            ...oldData,
+            transactions: [newTransaction, ...oldData.transactions],
+            total: oldData.total + 1,
+          };
         }
       );
       queryClient.invalidateQueries({
@@ -74,13 +44,10 @@ export const useCreateTransaction = () => {
   });
 };
 
-export const useTransaction = (id: string) => {
+export const useTransaction = (id: number) => {
   return useQuery({
-    queryKey: queryKeys.transactions.detail(id),
-    queryFn: async () => {
-      const transactions = await transactionsAPI.getTransactions();
-      return transactions.find((t) => t.id === id);
-    },
+    queryKey: queryKeys.transactions.detail(id.toString()),
+    queryFn: () => transactionsAPI.getTransaction(id),
     enabled: !!id,
   });
 };

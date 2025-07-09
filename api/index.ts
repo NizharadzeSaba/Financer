@@ -29,13 +29,51 @@ export interface AuthResponse {
   access_token: string;
 }
 
-export interface Transaction {
-  id: string;
-  amount: number;
+export interface Category {
+  id: number;
+  name: string;
   description: string;
-  category: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Transaction {
+  id: number;
   date: string;
+  description: string;
+  additionalInformation: string | null;
+  paidOut: string;
+  paidIn: string;
+  balance: string;
   type: "income" | "expense";
+  documentDate: string | null;
+  documentNumber: string | null;
+  partnersAccount: string | null;
+  partnersName: string | null;
+  partnersTaxCode: string | null;
+  partnersBankCode: string | null;
+  intermediaryBankCode: string | null;
+  chargeDetails: string | null;
+  taxpayerCode: string | null;
+  taxpayerName: string | null;
+  treasuryCode: string | null;
+  opCode: string | null;
+  additionalDescription: string | null;
+  transactionId: string | null;
+  detectedCategory: string;
+  categoryId: number;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+  category: Category;
+}
+
+export interface TransactionsResponse {
+  transactions: Transaction[];
+  total: number;
+  page: number;
+  totalPages: number;
 }
 
 export interface CreateTransactionRequest {
@@ -179,6 +217,29 @@ export const authAPI = {
     queryClient.invalidateQueries({ queryKey: queryKeys.auth.all });
     queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all });
     queryClient.clear();
+  },
+};
+
+// ============================================================================
+// TRANSACTIONS API
+// ============================================================================
+
+export const transactionsAPI = {
+  getTransactions: async (page: number = 1): Promise<TransactionsResponse> => {
+    return await apiFetch<TransactionsResponse>(`/transactions?page=${page}`);
+  },
+
+  getTransaction: async (id: number): Promise<Transaction> => {
+    return await apiFetch<Transaction>(`/transactions/${id}`);
+  },
+
+  createTransaction: async (
+    data: CreateTransactionRequest
+  ): Promise<Transaction> => {
+    return await apiFetch<Transaction>("/transactions", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
 };
 
