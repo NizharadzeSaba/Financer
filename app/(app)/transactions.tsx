@@ -1,6 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 import React from "react";
-import { RefreshControl } from "react-native";
+import { ActivityIndicator, RefreshControl, View } from "react-native";
 import {
   EmptyState,
   ErrorState,
@@ -8,16 +8,19 @@ import {
   TransactionItem,
   TransactionsHeader,
 } from "../../components";
-import { useTransactions } from "../../hooks/useTransactions";
+import { useInfiniteTransactions } from "../../hooks/useTransactions";
 
 export default function Transactions() {
   const {
-    data: transactionsData,
+    data,
     isLoading,
     error,
     refetch,
     isFetching,
-  } = useTransactions();
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteTransactions();
 
   if (isLoading) {
     return <LoadingState message="Loading transactions..." />;
@@ -29,7 +32,7 @@ export default function Transactions() {
     );
   }
 
-  const transactions = transactionsData?.transactions || [];
+  const transactions = data?.pages.flatMap((page) => page.transactions) || [];
 
   return (
     <FlashList
@@ -47,6 +50,20 @@ export default function Transactions() {
       ListHeaderComponent={<TransactionsHeader />}
       refreshControl={
         <RefreshControl refreshing={isFetching} onRefresh={refetch} />
+      }
+      onEndReached={() => {
+        console.log(hasNextPage);
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      }}
+      onEndReachedThreshold={0.2}
+      ListFooterComponent={
+        isFetchingNextPage ? (
+          <View style={{ padding: 16, alignItems: "center" }}>
+            <ActivityIndicator size="small" color="#3b82f6" />
+          </View>
+        ) : null
       }
     />
   );
