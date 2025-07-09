@@ -256,7 +256,7 @@ export default function Profile() {
               color: "#6b7280",
             }}
           >
-            USD ($)
+            GEL (₾)
           </Text>
         </TouchableOpacity>
 

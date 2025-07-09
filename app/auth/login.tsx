@@ -33,6 +33,7 @@ export default function Login() {
       router.replace("/(app)");
     } catch (error) {
       Alert.alert("Error", "Login failed. Please try again.");
+      console.log(error);
     }
   };
 

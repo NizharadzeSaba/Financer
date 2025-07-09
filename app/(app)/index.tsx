@@ -58,10 +58,10 @@ export default function Dashboard() {
               marginBottom: 4,
             }}
           >
-            $12,450.00
+            ₾12,450.00
           </Text>
           <Text style={{ fontSize: 12, color: "#10b981" }}>
-            +$1,250.00 this month
+            +₾1,250.00 this month
           </Text>
         </View>
 
@@ -92,10 +92,10 @@ export default function Dashboard() {
               marginBottom: 4,
             }}
           >
-            $3,200.00
+            ₾3,200.00
           </Text>
           <Text style={{ fontSize: 12, color: "#10b981" }}>
-            $800.00 remaining
+            ₾800.00 remaining
           </Text>
         </View>
       </View>
@@ -151,7 +151,7 @@ export default function Dashboard() {
                 color: "#ef4444",
               }}
             >
-              -$85.50
+              -₾85.50
             </Text>
           </View>
 
@@ -187,7 +187,7 @@ export default function Dashboard() {
                 color: "#10b981",
               }}
             >
-              +$3,500.00
+              +₾3,500.00
             </Text>
           </View>
 
@@ -221,7 +221,7 @@ export default function Dashboard() {
                 color: "#ef4444",
               }}
             >
-              -$4.75
+              -₾4.75
             </Text>
           </View>
         </View>

@@ -25,7 +25,7 @@ export default function Transactions() {
 
   const formatAmount = (amount: number, type: "income" | "expense") => {
     const sign = type === "income" ? "+" : "-";
-    return `${sign}$${Math.abs(amount).toFixed(2)}`;
+    return `${sign}₾${Math.abs(amount).toFixed(2)}`;
   };
 
   if (isLoading) {
