@@ -1,6 +1,13 @@
 import { router } from "expo-router";
 import React from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useLogout, useProfile } from "../../hooks/useAuth";
 
 export default function Profile() {
@@ -22,7 +29,13 @@ export default function Profile() {
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#f8fafc" }}>
+    <ScrollView
+      style={{ flex: 1 }}
+      refreshControl={
+        <RefreshControl refreshing={isLoading} onRefresh={() => refetch()} />
+      }
+      showsVerticalScrollIndicator={false}
+    >
       <View
         style={{
           alignItems: "center",
@@ -58,13 +71,6 @@ export default function Profile() {
           {user?.name || "User"}
         </Text>
         <Text style={{ fontSize: 16, color: "#64748b" }}>{user?.email}</Text>
-        {user?.id && (
-          <Text style={{ fontSize: 12, color: "#9ca3af", marginTop: 4 }}>
-            ID: {user.id}
-          </Text>
-        )}
-
-        {/* Status indicators */}
         <View style={{ marginTop: 16, flexDirection: "row", gap: 8 }}>
           {isLoading && (
             <Text style={{ fontSize: 12, color: "#3b82f6" }}>Loading...</Text>
@@ -74,9 +80,6 @@ export default function Profile() {
               Error loading profile
             </Text>
           )}
-          <TouchableOpacity onPress={() => refetch()}>
-            <Text style={{ fontSize: 12, color: "#10b981" }}>Refresh</Text>
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -443,36 +446,6 @@ export default function Profile() {
             }}
           >
             Logout
-          </Text>
-          <Text
-            style={{
-              fontSize: 18,
-              color: "#9ca3af",
-            }}
-          >
-            ›
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            backgroundColor: "#ffffff",
-            paddingHorizontal: 20,
-            paddingVertical: 16,
-            borderBottomWidth: 1,
-            borderBottomColor: "#fee2e2",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 16,
-              color: "#ef4444",
-            }}
-          >
-            Delete Account
           </Text>
           <Text
             style={{
