@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import React from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useLogout, useProfile } from "../../hooks/useAuth";
@@ -12,7 +13,10 @@ export default function Profile() {
       {
         text: "Logout",
         style: "destructive",
-        onPress: async () => await logoutMutation.mutateAsync(),
+        onPress: async () => {
+          await logoutMutation.mutateAsync();
+          router.replace("/auth/login");
+        },
       },
     ]);
   };
