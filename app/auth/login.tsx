@@ -105,6 +105,7 @@ export default function Login() {
               }}
               value={email}
               onChangeText={setEmail}
+              placeholderTextColor="#9ca3af"
               placeholder="Enter your email"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -134,6 +135,7 @@ export default function Login() {
                 fontSize: 16,
                 color: "#1f2937",
               }}
+              placeholderTextColor="#9ca3af"
               value={password}
               onChangeText={setPassword}
               placeholder="Enter your password"
