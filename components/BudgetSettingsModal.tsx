@@ -72,6 +72,7 @@ export const BudgetSettingsModal: React.FC<BudgetSettingsModalProps> = ({
       onClose();
     } catch (error) {
       Alert.alert("Error", "Failed to save budget settings");
+      console.error(error);
     } finally {
       setSaving(false);
     }
@@ -96,7 +97,6 @@ export const BudgetSettingsModal: React.FC<BudgetSettingsModalProps> = ({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <View style={{ flex: 1, backgroundColor: "#f8fafc" }}>
-          {/* Header */}
           <View
             style={{
               padding: 20,
@@ -134,7 +134,6 @@ export const BudgetSettingsModal: React.FC<BudgetSettingsModalProps> = ({
           </View>
 
           <ScrollView style={{ flex: 1 }}>
-            {/* Monthly Budget */}
             <View style={{ padding: 20 }}>
               <View
                 style={{
@@ -172,7 +171,6 @@ export const BudgetSettingsModal: React.FC<BudgetSettingsModalProps> = ({
               </View>
             </View>
 
-            {/* Category Limits */}
             <View style={{ padding: 20, paddingTop: 0 }}>
               <Text
                 style={{
