@@ -19,6 +19,14 @@ export const useTransactions = (page: number = 1) => {
   });
 };
 
+export const useRecentTransactions = (limit: number = 4) => {
+  return useQuery({
+    queryKey: [...queryKeys.transactions.lists(), "recent", limit],
+    queryFn: () => transactionsAPI.getRecentTransactions(limit),
+    staleTime: 2 * 60 * 1000,
+  });
+};
+
 export const useInfiniteTransactions = () => {
   return useInfiniteQuery<TransactionsResponse, Error>({
     queryKey: queryKeys.transactions.lists(),

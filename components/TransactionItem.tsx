@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Transaction } from "../api";
+import { formatAmount, formatDate } from "../utils/transactionUtils";
 
 interface TransactionItemProps {
   transaction: Transaction;
@@ -8,40 +9,6 @@ interface TransactionItemProps {
 
 export const TransactionItem = ({ transaction }: TransactionItemProps) => {
   const [expanded, setExpanded] = useState(false);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) return "Today";
-    if (diffDays === 2) return "Yesterday";
-    if (diffDays <= 7) return `${diffDays - 1} days ago`;
-    return date.toLocaleDateString();
-  };
-
-  const formatAmount = (
-    paidOut: string,
-    paidIn: string,
-    type: "income" | "expense"
-  ) => {
-    const amount = type === "income" ? parseFloat(paidIn) : parseFloat(paidOut);
-    const sign = type === "income" ? "+" : "-";
-    return `${sign}₾${Math.abs(amount).toFixed(2)}`;
-  };
-
-  const desc = transaction.description;
-  const firstSemicolonIdx = desc.indexOf(";");
-  const descAfterFirstSemicolon =
-    firstSemicolonIdx !== -1 ? desc.slice(firstSemicolonIdx + 1).trim() : desc;
-
-  const descLines = descAfterFirstSemicolon.split("\n");
-  const collapsedDescription = descLines[0] || "";
-  const expandedDescription = descAfterFirstSemicolon;
-  const displayDescription = expanded
-    ? expandedDescription
-    : collapsedDescription;
 
   return (
     <TouchableOpacity
@@ -58,20 +25,21 @@ export const TransactionItem = ({ transaction }: TransactionItemProps) => {
         marginHorizontal: 16,
         borderRadius: 12,
         marginVertical: 8,
+        gap: 24,
       }}
     >
       <View style={{ flex: 1 }}>
         <Text
           style={{
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: "500",
             color: "#1e293b",
             marginBottom: 4,
           }}
-          numberOfLines={expanded ? undefined : 1}
+          numberOfLines={expanded ? undefined : 2}
           ellipsizeMode={expanded ? undefined : "tail"}
         >
-          {displayDescription}
+          {transaction.description}
         </Text>
         <Text
           style={{

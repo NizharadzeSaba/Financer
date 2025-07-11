@@ -230,6 +230,13 @@ export const transactionsAPI = {
     return await apiFetch<TransactionsResponse>(`/transactions?page=${page}`);
   },
 
+  getRecentTransactions: async (limit: number = 4): Promise<Transaction[]> => {
+    const response = await apiFetch<TransactionsResponse>(
+      `/transactions?limit=${limit}`
+    );
+    return response.transactions;
+  },
+
   getTransaction: async (id: number): Promise<Transaction> => {
     return await apiFetch<Transaction>(`/transactions/${id}`);
   },

@@ -1,12 +1,28 @@
 import * as DocumentPicker from "expo-document-picker";
 import React from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, RefreshControl, ScrollView, View } from "react-native";
+import {
+  BalanceCard,
+  DashboardHeader,
+  QuickActionButton,
+  SectionHeader,
+  TransactionsContainer,
+} from "../../components";
 import { useProfile } from "../../hooks/useAuth";
-import { useImportTransactionsCSV } from "../../hooks/useTransactions";
+import {
+  useImportTransactionsCSV,
+  useRecentTransactions,
+} from "../../hooks/useTransactions";
+import { formatTransactionForDashboard } from "../../utils/transactionUtils";
 
 export default function Dashboard() {
   const { data: user } = useProfile();
   const importCSVMutation = useImportTransactionsCSV();
+  const {
+    data: recentTransactionsData,
+    isLoading: isLoadingTransactions,
+    refetch: refetchRecentTransactions,
+  } = useRecentTransactions(3);
 
   const handleImportCSV = async (bankCode: "tbc" | "bog") => {
     try {
@@ -29,310 +45,68 @@ export default function Dashboard() {
     }
   };
 
+  const recentTransactions =
+    recentTransactionsData?.map(formatTransactionForDashboard) || [];
+
+  const isImporting = importCSVMutation.status === "pending";
+
   return (
-    <ScrollView style={{ flex: 1 }}>
+    <ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={isLoadingTransactions}
+          onRefresh={refetchRecentTransactions}
+        />
+      }
+      style={{ flex: 1 }}
+    >
+      <DashboardHeader userName={user?.name} />
+
       <View
         style={{
-          padding: 20,
-          backgroundColor: "#ffffff",
-          borderBottomWidth: 1,
-          borderBottomColor: "#e5e7eb",
+          flexDirection: "row",
+          paddingHorizontal: 20,
+          paddingTop: 20,
+          gap: 12,
         }}
       >
-        <Text
-          style={{
-            fontSize: 24,
-            fontWeight: "bold",
-            color: "#1e293b",
-            marginBottom: 4,
-          }}
-        >
-          Welcome back, {user?.name}!
-        </Text>
-        <Text style={{ fontSize: 16, color: "#64748b" }}>
-          Here&apos;s your financial overview
-        </Text>
+        <BalanceCard
+          title="Total Balance"
+          amount="₾12,450.00"
+          subtitle="+₾1,250.00 this month"
+        />
+        <BalanceCard
+          title="Monthly Spending"
+          amount="₾3,200.00"
+          subtitle="₾800.00 remaining"
+        />
       </View>
 
-      <View style={{ flexDirection: "row", padding: 20, gap: 12 }}>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "#ffffff",
-            padding: 16,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: "#e5e7eb",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              color: "#64748b",
-              marginBottom: 4,
-            }}
-          >
-            Total Balance
-          </Text>
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: "bold",
-              color: "#1e293b",
-              marginBottom: 4,
-            }}
-          >
-            ₾12,450.00
-          </Text>
-          <Text style={{ fontSize: 12, color: "#10b981" }}>
-            +₾1,250.00 this month
-          </Text>
-        </View>
+      <SectionHeader title="Recent Transactions" />
+      <TransactionsContainer
+        transactions={recentTransactions}
+        isLoading={isLoadingTransactions}
+      />
 
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "#ffffff",
-            padding: 16,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: "#e5e7eb",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              color: "#64748b",
-              marginBottom: 4,
-            }}
-          >
-            Monthly Spending
-          </Text>
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: "bold",
-              color: "#1e293b",
-              marginBottom: 4,
-            }}
-          >
-            ₾3,200.00
-          </Text>
-          <Text style={{ fontSize: 12, color: "#10b981" }}>
-            ₾800.00 remaining
-          </Text>
-        </View>
-      </View>
-
-      <View style={{ padding: 20 }}>
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: "600",
-            color: "#1e293b",
-            marginBottom: 16,
-          }}
-        >
-          Recent Transactions
-        </Text>
-        <View
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: "#e5e7eb",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: 16,
-              borderBottomWidth: 1,
-              borderBottomColor: "#f3f4f6",
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "500",
-                  color: "#1e293b",
-                  marginBottom: 4,
-                }}
-              >
-                Grocery Store
-              </Text>
-              <Text style={{ fontSize: 14, color: "#6b7280" }}>
-                Today, 2:30 PM
-              </Text>
-            </View>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "600",
-                color: "#ef4444",
-              }}
-            >
-              -₾85.50
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: 16,
-              borderBottomWidth: 1,
-              borderBottomColor: "#f3f4f6",
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "500",
-                  color: "#1e293b",
-                  marginBottom: 4,
-                }}
-              >
-                Salary Deposit
-              </Text>
-              <Text style={{ fontSize: 14, color: "#6b7280" }}>
-                Yesterday, 9:00 AM
-              </Text>
-            </View>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "600",
-                color: "#10b981",
-              }}
-            >
-              +₾3,500.00
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: 16,
-            }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "500",
-                  color: "#1e293b",
-                  marginBottom: 4,
-                }}
-              >
-                Coffee Shop
-              </Text>
-              <Text style={{ fontSize: 14, color: "#6b7280" }}>
-                Yesterday, 8:15 AM
-              </Text>
-            </View>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "600",
-                color: "#ef4444",
-              }}
-            >
-              -₾4.75
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={{ padding: 20 }}>
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: "600",
-            color: "#1e293b",
-            marginBottom: 16,
-          }}
-        >
-          Quick Actions
-        </Text>
-        <View style={{ flexDirection: "row", gap: 12 }}>
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "#3b82f6",
-              padding: 12,
-              borderRadius: 12,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text
-              style={{
-                color: "#ffffff",
-                fontSize: 14,
-                fontWeight: "600",
-                textAlign: "center",
-              }}
-            >
-              Add Transaction
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              backgroundColor: "#3b82f6",
-              padding: 12,
-              borderRadius: 12,
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: importCSVMutation.status === "pending" ? 0.6 : 1,
-            }}
-            disabled={importCSVMutation.status === "pending"}
-            onPress={() => handleImportCSV("tbc")}
-          >
-            <Text
-              style={{
-                color: "#ffffff",
-                fontSize: 14,
-                fontWeight: "600",
-                textAlign: "center",
-              }}
-            >
-              Add TBC Transactions
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              backgroundColor: "#3b82f6",
-              padding: 12,
-              borderRadius: 12,
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: importCSVMutation.status === "pending" ? 0.6 : 1,
-            }}
-            disabled={importCSVMutation.status === "pending"}
-            onPress={() => handleImportCSV("bog")}
-          >
-            <Text
-              style={{
-                color: "#ffffff",
-                fontSize: 14,
-                fontWeight: "600",
-                textAlign: "center",
-              }}
-            >
-              Add BOG Transactions
-            </Text>
-          </TouchableOpacity>
-        </View>
+      <SectionHeader title="Quick Actions" />
+      <View style={{ flexDirection: "row", gap: 12, paddingHorizontal: 20 }}>
+        <QuickActionButton
+          title="Add Transaction"
+          onPress={() => {}}
+          disabled={isImporting}
+        />
+        <QuickActionButton
+          title="Add TBC Transactions"
+          onPress={() => handleImportCSV("tbc")}
+          disabled={isImporting}
+          isLoading={isImporting}
+        />
+        <QuickActionButton
+          title="Add BOG Transactions"
+          onPress={() => handleImportCSV("bog")}
+          disabled={isImporting}
+          isLoading={isImporting}
+        />
       </View>
     </ScrollView>
   );
