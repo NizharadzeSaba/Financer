@@ -1,9 +1,4 @@
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import {
   CreateTransactionRequest,
   queryKeys,
@@ -47,33 +42,9 @@ export const useInfiniteTransactions = () => {
 };
 
 export const useCreateTransaction = () => {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (data: CreateTransactionRequest) =>
       transactionsAPI.createTransaction(data),
-    onSuccess: (newTransaction) => {
-      queryClient.setQueryData(
-        queryKeys.transactions.lists(),
-        (oldData: any) => {
-          if (!oldData)
-            return {
-              transactions: [newTransaction],
-              total: 1,
-              page: 1,
-              totalPages: 1,
-            };
-          return {
-            ...oldData,
-            transactions: [newTransaction, ...oldData.transactions],
-            total: oldData.total + 1,
-          };
-        }
-      );
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.transactions.lists(),
-      });
-    },
   });
 };
 

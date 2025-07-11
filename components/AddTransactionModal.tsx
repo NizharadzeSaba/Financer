@@ -1,6 +1,8 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
+import { queryKeys } from "../api";
 import {
   useCreateTransaction,
   useTransactionCategories,
@@ -17,6 +19,7 @@ export function AddTransactionModal({
   onClose,
   onSuccess,
 }: AddTransactionModalProps) {
+  const queryClient = useQueryClient();
   const createTransaction = useCreateTransaction();
   const { data: categories } = useTransactionCategories();
 
@@ -44,26 +47,76 @@ export function AddTransactionModal({
   const handleAddTransaction = () => {
     if (!amount || !type || !categoryId) return;
 
-    createTransaction.mutate(
-      {
-        paidOut: type === "expense" ? parseFloat(amount) : 0,
-        paidIn: type === "income" ? parseFloat(amount) : 0,
-        description: "Manual Entry",
-        category: String(categoryId),
-        type,
-        date: "2025-04-30",
-        balance: 0,
+    const transactionData = {
+      paidOut: type === "expense" ? parseFloat(amount) : 0,
+      paidIn: type === "income" ? parseFloat(amount) : 0,
+      description: "Manual Entry",
+      category: String(categoryId),
+      type,
+      date: "2025-04-30",
+      balance: 0,
+    };
+
+    createTransaction.mutate(transactionData, {
+      onSuccess: (newTransaction) => {
+        try {
+          if (
+            newTransaction &&
+            typeof newTransaction === "object" &&
+            newTransaction.id
+          ) {
+            queryClient.setQueryData(
+              queryKeys.transactions.lists(),
+              (oldData: any) => {
+                if (!oldData) {
+                  return {
+                    transactions: [newTransaction],
+                    total: 1,
+                    page: 1,
+                    totalPages: 1,
+                  };
+                }
+
+                const existingTransactions = Array.isArray(oldData.transactions)
+                  ? oldData.transactions
+                  : [];
+
+                return {
+                  ...oldData,
+                  transactions: [newTransaction, ...existingTransactions],
+                  total: oldData.total + 1,
+                };
+              }
+            );
+          } else {
+            console.warn("Invalid transaction response:", newTransaction);
+          }
+        } catch (error) {
+          console.error("Error updating cache:", error);
+        }
+
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.transactions.lists(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["transactions", "stats"],
+        });
+
+        setAmount("");
+        setType("expense");
+        setCategoryId(null);
+        setOpen(false);
+
+        onClose();
       },
-      {
-        onSuccess: () => {
-          setAmount("");
-          setType("expense");
-          setCategoryId(null);
-          onClose();
-          onSuccess?.();
-        },
-      }
-    );
+      onError: (error) => {
+        console.error("Failed to add transaction:", error);
+        console.error("Error details:", {
+          message: error.message,
+          stack: error.stack,
+        });
+      },
+    });
   };
 
   const resetForm = () => {
