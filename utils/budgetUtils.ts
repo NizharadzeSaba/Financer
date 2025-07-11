@@ -14,7 +14,7 @@ const BUDGET_SETTINGS_KEY = "budget_settings";
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: "GEL",
   }).format(amount);
 };
 
