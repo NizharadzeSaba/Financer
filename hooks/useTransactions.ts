@@ -9,6 +9,7 @@ import {
   queryKeys,
   transactionsAPI,
   TransactionsResponse,
+  TransactionsStats,
 } from "../api";
 
 export const useTransactions = (page: number = 1) => {
@@ -87,6 +88,14 @@ export const useImportTransactionsCSV = () => {
     }) => {
       return transactionsAPI.importTransactionsCSV(bankCode, file);
     },
+  });
+};
+
+export const useTransactionsStats = () => {
+  return useQuery<TransactionsStats, Error>({
+    queryKey: ["transactions", "stats"],
+    queryFn: () => transactionsAPI.getStats(),
+    staleTime: 2 * 60 * 1000,
   });
 };
 

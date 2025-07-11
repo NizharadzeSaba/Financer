@@ -84,6 +84,21 @@ export interface CreateTransactionRequest {
   type: "income" | "expense";
 }
 
+export interface TransactionsStats {
+  totalExpenses: number;
+  totalIncome: number;
+  expensesByCategory: {
+    category: string;
+    amount: number;
+    percentage: number;
+  }[];
+  monthlyTrends: {
+    month: string;
+    expenses: number;
+    income: number;
+  }[];
+}
+
 // ============================================================================
 // API CONFIGURATION
 // ============================================================================
@@ -235,6 +250,10 @@ export const transactionsAPI = {
       `/transactions?limit=${limit}`
     );
     return response.transactions;
+  },
+
+  getStats: async (): Promise<TransactionsStats> => {
+    return await apiFetch<TransactionsStats>(`/transactions/stats`);
   },
 
   getTransaction: async (id: number): Promise<Transaction> => {

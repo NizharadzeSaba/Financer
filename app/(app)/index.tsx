@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as DocumentPicker from "expo-document-picker";
 import React from "react";
 import { Alert, RefreshControl, ScrollView, View } from "react-native";
+import { TransactionsStats } from "../../api";
 import {
   BalanceCard,
   DashboardHeader,
@@ -13,8 +14,43 @@ import { useProfile } from "../../hooks/useAuth";
 import {
   useImportTransactionsCSV,
   useRecentTransactions,
+  useTransactionsStats,
 } from "../../hooks/useTransactions";
 import { formatTransactionForDashboard } from "../../utils/transactionUtils";
+
+function getMonthDiff(
+  stats: TransactionsStats | undefined,
+  type: "income" | "expense"
+): number | null {
+  if (!stats || !stats.monthlyTrends || stats.monthlyTrends.length < 2)
+    return null;
+  const trends = stats.monthlyTrends;
+  const current = trends[trends.length - 1];
+  const prev = trends[trends.length - 2];
+  if (!current || !prev) return null;
+  const diff =
+    type === "income"
+      ? current.income - prev.income
+      : current.expenses - prev.expenses;
+  return diff;
+}
+
+function formatCurrency(amount: number | undefined): string {
+  if (amount == null) return "0.00";
+  return amount.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatDiff(diff: number | null): string {
+  if (diff == null) return "";
+  const sign = diff > 0 ? "+" : diff < 0 ? "−" : "";
+  return `${sign}₾${Math.abs(diff).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} this month`;
+}
 
 export default function Dashboard() {
   const { data: user } = useProfile();
@@ -25,6 +61,12 @@ export default function Dashboard() {
     isLoading: isLoadingTransactions,
     refetch: refetchRecentTransactions,
   } = useRecentTransactions(3);
+  const { data: stats, isLoading: isLoadingStats } = useTransactionsStats();
+
+  const currentMonth = stats?.monthlyTrends?.[stats.monthlyTrends.length - 1];
+
+  const expenseDiff = getMonthDiff(stats, "expense");
+  const incomeDiff = getMonthDiff(stats, "income");
 
   const handleImportCSV = async (bankCode: "tbc" | "bog") => {
     try {
@@ -74,14 +116,20 @@ export default function Dashboard() {
         }}
       >
         <BalanceCard
-          title="Total Balance"
-          amount="₾12,450.00"
-          subtitle="+₾1,250.00 this month"
+          title="Monthly Income"
+          amount={
+            isLoadingStats ? "..." : `₾${formatCurrency(currentMonth?.income)}`
+          }
+          subtitle={isLoadingStats ? "" : formatDiff(incomeDiff)}
         />
         <BalanceCard
-          title="Monthly Spending"
-          amount="₾3,200.00"
-          subtitle="₾800.00 remaining"
+          title="Monthly Expenses"
+          amount={
+            isLoadingStats
+              ? "..."
+              : `₾${formatCurrency(currentMonth?.expenses)}`
+          }
+          subtitle={isLoadingStats ? "" : formatDiff(expenseDiff)}
         />
       </View>
 
