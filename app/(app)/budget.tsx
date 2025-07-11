@@ -1,7 +1,53 @@
-import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import React, { useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { queryClient } from "../../api";
+import { BudgetSettingsModal } from "../../components/BudgetSettingsModal";
+import { ErrorState } from "../../components/ErrorState";
+import { LoadingState } from "../../components/LoadingState";
+import { useBudget } from "../../hooks/useBudget";
+import {
+  calculateCategoryProgress,
+  formatCurrency,
+  getCategoryColor,
+  isCategoryOverBudget,
+} from "../../utils/budgetUtils";
 
 export default function Budget() {
+  const {
+    budgetSummary,
+    totalSpentPercentage,
+    isOverBudget,
+    isLoading,
+    error,
+    budgetSettings,
+    updateBudgetSettings,
+  } = useBudget();
+  const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+
+  const handleRetry = () => {
+    queryClient.invalidateQueries({ queryKey: ["transactions", "stats"] });
+  };
+
+  if (isLoading) {
+    return <LoadingState message="Loading budget data..." />;
+  }
+
+  if (error) {
+    return (
+      <ErrorState message="Failed to load budget data" onRetry={handleRetry} />
+    );
+  }
+
+  if (!budgetSummary || !budgetSettings) {
+    return (
+      <ErrorState message="No budget data available" onRetry={handleRetry} />
+    );
+  }
+
+  const handleSaveSettings = async (newSettings: any) => {
+    await updateBudgetSettings(newSettings);
+  };
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#f8fafc" }}>
       <View
@@ -10,21 +56,39 @@ export default function Budget() {
           backgroundColor: "#ffffff",
           borderBottomWidth: 1,
           borderBottomColor: "#e5e7eb",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        <Text
+        <View>
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: "bold",
+              color: "#1e293b",
+              marginBottom: 4,
+            }}
+          >
+            Budget
+          </Text>
+          <Text style={{ fontSize: 16, color: "#64748b" }}>
+            Track your spending and set limits
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => setSettingsModalVisible(true)}
           style={{
-            fontSize: 24,
-            fontWeight: "bold",
-            color: "#1e293b",
-            marginBottom: 4,
+            backgroundColor: "#3b82f6",
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 8,
           }}
         >
-          Budget
-        </Text>
-        <Text style={{ fontSize: 16, color: "#64748b" }}>
-          Track your spending and set limits
-        </Text>
+          <Text style={{ color: "#ffffff", fontWeight: "600", fontSize: 14 }}>
+            Settings
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={{ padding: 20 }}>
@@ -54,7 +118,7 @@ export default function Budget() {
               marginBottom: 8,
             }}
           >
-            $4,000.00
+            {formatCurrency(budgetSummary.monthlyBudget)}
           </Text>
           <Text
             style={{
@@ -63,7 +127,7 @@ export default function Budget() {
               marginBottom: 12,
             }}
           >
-            $3,200.00 spent
+            {formatCurrency(budgetSummary.totalSpent)} spent
           </Text>
           <View
             style={{
@@ -77,20 +141,24 @@ export default function Budget() {
             <View
               style={{
                 height: "100%",
-                backgroundColor: "#10b981",
+                backgroundColor: isOverBudget ? "#ef4444" : "#10b981",
                 borderRadius: 4,
-                width: "80%",
+                width: `${Math.min(totalSpentPercentage, 100)}%`,
               }}
             />
           </View>
           <Text
             style={{
               fontSize: 14,
-              color: "#10b981",
+              color: isOverBudget ? "#ef4444" : "#10b981",
               fontWeight: "600",
             }}
           >
-            $800.00 remaining
+            {isOverBudget
+              ? `${formatCurrency(
+                  Math.abs(budgetSummary.remaining)
+                )} over budget`
+              : `${formatCurrency(budgetSummary.remaining)} remaining`}
           </Text>
         </View>
       </View>
@@ -107,281 +175,115 @@ export default function Budget() {
           Budget Categories
         </Text>
 
-        <View
-          style={{
-            backgroundColor: "#ffffff",
-            padding: 16,
-            borderRadius: 12,
-            marginBottom: 12,
-            borderWidth: 1,
-            borderColor: "#e5e7eb",
-          }}
-        >
+        {budgetSummary.categories.length === 0 ? (
           <View
             style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
+              backgroundColor: "#ffffff",
+              padding: 40,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: "#e5e7eb",
               alignItems: "center",
-              marginBottom: 8,
             }}
           >
             <Text
               style={{
                 fontSize: 16,
-                fontWeight: "500",
-                color: "#1e293b",
-              }}
-            >
-              Food & Dining
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
                 color: "#6b7280",
+                textAlign: "center",
               }}
             >
-              $850 / $1,000
+              No spending categories found. Start making transactions to see
+              your budget breakdown.
             </Text>
           </View>
-          <View
-            style={{
-              height: 8,
-              backgroundColor: "#f3f4f6",
-              borderRadius: 4,
-              overflow: "hidden",
-            }}
-          >
-            <View
-              style={{
-                height: "100%",
-                backgroundColor: "#10b981",
-                borderRadius: 4,
-                width: "85%",
-              }}
-            />
-          </View>
-        </View>
+        ) : (
+          budgetSummary.categories.map((category) => {
+            const progress = calculateCategoryProgress(category);
+            const categoryColor = getCategoryColor(category);
+            const categoryOverBudget = isCategoryOverBudget(category);
 
-        <View
-          style={{
-            backgroundColor: "#ffffff",
-            padding: 16,
-            borderRadius: 12,
-            marginBottom: 12,
-            borderWidth: 1,
-            borderColor: "#e5e7eb",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "500",
-                color: "#1e293b",
-              }}
-            >
-              Transportation
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: "#6b7280",
-              }}
-            >
-              $300 / $400
-            </Text>
-          </View>
-          <View
-            style={{
-              height: 8,
-              backgroundColor: "#f3f4f6",
-              borderRadius: 4,
-              overflow: "hidden",
-            }}
-          >
-            <View
-              style={{
-                height: "100%",
-                backgroundColor: "#10b981",
-                borderRadius: 4,
-                width: "75%",
-              }}
-            />
-          </View>
-        </View>
-
-        <View
-          style={{
-            backgroundColor: "#ffffff",
-            padding: 16,
-            borderRadius: 12,
-            marginBottom: 12,
-            borderWidth: 1,
-            borderColor: "#e5e7eb",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "500",
-                color: "#1e293b",
-              }}
-            >
-              Shopping
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: "#6b7280",
-              }}
-            >
-              $600 / $500
-            </Text>
-          </View>
-          <View
-            style={{
-              height: 8,
-              backgroundColor: "#f3f4f6",
-              borderRadius: 4,
-              overflow: "hidden",
-            }}
-          >
-            <View
-              style={{
-                height: "100%",
-                backgroundColor: "#ef4444",
-                borderRadius: 4,
-                width: "120%",
-              }}
-            />
-          </View>
-        </View>
-
-        <View
-          style={{
-            backgroundColor: "#ffffff",
-            padding: 16,
-            borderRadius: 12,
-            marginBottom: 12,
-            borderWidth: 1,
-            borderColor: "#e5e7eb",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "500",
-                color: "#1e293b",
-              }}
-            >
-              Entertainment
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: "#6b7280",
-              }}
-            >
-              $200 / $300
-            </Text>
-          </View>
-          <View
-            style={{
-              height: 8,
-              backgroundColor: "#f3f4f6",
-              borderRadius: 4,
-              overflow: "hidden",
-            }}
-          >
-            <View
-              style={{
-                height: "100%",
-                backgroundColor: "#10b981",
-                borderRadius: 4,
-                width: "67%",
-              }}
-            />
-          </View>
-        </View>
-
-        <View
-          style={{
-            backgroundColor: "#ffffff",
-            padding: 16,
-            borderRadius: 12,
-            marginBottom: 12,
-            borderWidth: 1,
-            borderColor: "#e5e7eb",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "500",
-                color: "#1e293b",
-              }}
-            >
-              Utilities
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: "#6b7280",
-              }}
-            >
-              $250 / $250
-            </Text>
-          </View>
-          <View
-            style={{
-              height: 8,
-              backgroundColor: "#f3f4f6",
-              borderRadius: 4,
-              overflow: "hidden",
-            }}
-          >
-            <View
-              style={{
-                height: "100%",
-                backgroundColor: "#10b981",
-                borderRadius: 4,
-                width: "100%",
-              }}
-            />
-          </View>
-        </View>
+            return (
+              <View
+                key={category.id}
+                style={{
+                  backgroundColor: "#ffffff",
+                  padding: 16,
+                  borderRadius: 12,
+                  marginBottom: 12,
+                  borderWidth: 1,
+                  borderColor: "#e5e7eb",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "500",
+                      color: "#1e293b",
+                    }}
+                  >
+                    {category.name}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: categoryOverBudget ? "#ef4444" : "#6b7280",
+                    }}
+                  >
+                    {formatCurrency(category.spent)} /{" "}
+                    {formatCurrency(category.limit)}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    height: 8,
+                    backgroundColor: "#f3f4f6",
+                    borderRadius: 4,
+                    overflow: "hidden",
+                  }}
+                >
+                  <View
+                    style={{
+                      height: "100%",
+                      backgroundColor: categoryColor,
+                      borderRadius: 4,
+                      width: `${Math.min(progress, 100)}%`,
+                    }}
+                  />
+                </View>
+                {categoryOverBudget && (
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#ef4444",
+                      marginTop: 4,
+                      fontWeight: "500",
+                    }}
+                  >
+                    {formatCurrency(category.spent - category.limit)} over
+                    budget
+                  </Text>
+                )}
+              </View>
+            );
+          })
+        )}
       </View>
+
+      <BudgetSettingsModal
+        visible={settingsModalVisible}
+        onClose={() => setSettingsModalVisible(false)}
+        currentSettings={budgetSettings}
+        onSave={handleSaveSettings}
+      />
     </ScrollView>
   );
 }
