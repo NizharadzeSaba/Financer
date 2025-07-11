@@ -68,6 +68,20 @@ export const useCreateTransaction = () => {
   });
 };
 
+export const useImportTransactionsCSV = () => {
+  return useMutation({
+    mutationFn: async ({
+      bankCode,
+      file,
+    }: {
+      bankCode: "tbc" | "bog";
+      file: import("expo-document-picker").DocumentPickerAsset;
+    }) => {
+      return transactionsAPI.importTransactionsCSV(bankCode, file);
+    },
+  });
+};
+
 export const useTransaction = (id: number) => {
   return useQuery({
     queryKey: queryKeys.transactions.detail(id.toString()),

@@ -1,9 +1,33 @@
+import * as DocumentPicker from "expo-document-picker";
 import React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useProfile } from "../../hooks/useAuth";
+import { useImportTransactionsCSV } from "../../hooks/useTransactions";
 
 export default function Dashboard() {
   const { data: user } = useProfile();
+  const importCSVMutation = useImportTransactionsCSV();
+
+  const handleImportCSV = async (bankCode: "tbc" | "bog") => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "text/csv",
+        copyToCacheDirectory: true,
+      });
+      if (result.canceled) return;
+      const file = result.assets[0];
+      await importCSVMutation.mutateAsync({ bankCode, file });
+      Alert.alert(
+        "Success",
+        `${bankCode.toUpperCase()} CSV imported successfully`
+      );
+    } catch (e) {
+      Alert.alert(
+        "Error",
+        e instanceof Error ? e.message : "Failed to import CSV"
+      );
+    }
+  };
 
   return (
     <ScrollView style={{ flex: 1 }}>
@@ -260,7 +284,7 @@ export default function Dashboard() {
               Add Transaction
             </Text>
           </View>
-          <View
+          <TouchableOpacity
             style={{
               flex: 1,
               backgroundColor: "#3b82f6",
@@ -268,7 +292,10 @@ export default function Dashboard() {
               borderRadius: 12,
               alignItems: "center",
               justifyContent: "center",
+              opacity: importCSVMutation.status === "pending" ? 0.6 : 1,
             }}
+            disabled={importCSVMutation.status === "pending"}
+            onPress={() => handleImportCSV("tbc")}
           >
             <Text
               style={{
@@ -278,10 +305,10 @@ export default function Dashboard() {
                 textAlign: "center",
               }}
             >
-              Set Budget
+              Add TBC Transactions
             </Text>
-          </View>
-          <View
+          </TouchableOpacity>
+          <TouchableOpacity
             style={{
               flex: 1,
               backgroundColor: "#3b82f6",
@@ -289,7 +316,10 @@ export default function Dashboard() {
               borderRadius: 12,
               alignItems: "center",
               justifyContent: "center",
+              opacity: importCSVMutation.status === "pending" ? 0.6 : 1,
             }}
+            disabled={importCSVMutation.status === "pending"}
+            onPress={() => handleImportCSV("bog")}
           >
             <Text
               style={{
@@ -299,9 +329,9 @@ export default function Dashboard() {
                 textAlign: "center",
               }}
             >
-              View Reports
+              Add BOG Transactions
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>

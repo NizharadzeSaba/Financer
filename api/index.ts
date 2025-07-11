@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient } from "@tanstack/react-query";
+import type { DocumentPickerAsset } from "expo-document-picker";
 
 // ============================================================================
 // TYPES
@@ -240,6 +241,36 @@ export const transactionsAPI = {
       method: "POST",
       body: JSON.stringify(data),
     });
+  },
+
+  importTransactionsCSV: async (
+    bankCode: "tbc" | "bog",
+    file: DocumentPickerAsset
+  ): Promise<void> => {
+    const formData = new FormData();
+    formData.append("file", {
+      uri: file.uri,
+      name: file.name,
+      type: file.mimeType || "text/csv",
+    } as any);
+    const token = await AsyncStorage.getItem("authToken");
+    const response = await fetch(
+      `${API_BASE_URL}/transactions/import/csv/${bankCode}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      }
+    );
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `Failed to import CSV for ${bankCode}`
+      );
+    }
   },
 };
 
