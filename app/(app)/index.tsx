@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import * as DocumentPicker from "expo-document-picker";
 import React from "react";
 import { Alert, RefreshControl, ScrollView, View } from "react-native";
@@ -18,6 +19,7 @@ import { formatTransactionForDashboard } from "../../utils/transactionUtils";
 export default function Dashboard() {
   const { data: user } = useProfile();
   const importCSVMutation = useImportTransactionsCSV();
+  const queryClient = useQueryClient();
   const {
     data: recentTransactionsData,
     isLoading: isLoadingTransactions,
@@ -37,6 +39,7 @@ export default function Dashboard() {
         "Success",
         `${bankCode.toUpperCase()} CSV imported successfully`
       );
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
     } catch (e) {
       Alert.alert(
         "Error",
