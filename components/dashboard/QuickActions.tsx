@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as DocumentPicker from "expo-document-picker";
 import React from "react";
 import { Alert, View } from "react-native";
-import { useImportTransactionsCSV } from "../hooks/useTransactions";
+import { useImportTransactionsCSV } from "../../hooks/useTransactions";
 import { QuickActionButton } from "./QuickActionButton";
 
 interface QuickActionsProps {

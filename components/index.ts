@@ -1,14 +1,14 @@
-export * from "./AddTransactionModal";
-export * from "./BalanceCard";
-export * from "./BudgetSettingsModal";
-export * from "./DashboardHeader";
-export * from "./DashboardTransactionItem";
-export * from "./EmptyState";
-export * from "./ErrorState";
-export * from "./LoadingState";
-export * from "./QuickActionButton";
-export * from "./QuickActions";
-export * from "./SectionHeader";
-export * from "./TransactionItem";
-export * from "./TransactionsContainer";
-export * from "./TransactionsHeader";
+// Common components
+export * from "./common";
+
+// Dashboard components
+export * from "./dashboard";
+
+// Transaction components
+export * from "./transactions";
+
+// Budget components
+export * from "./budget";
+
+// Shared components
+export * from "./shared";

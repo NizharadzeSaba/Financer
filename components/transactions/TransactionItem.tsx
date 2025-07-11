@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { Transaction } from "../api";
-import { formatAmount, formatDate } from "../utils/transactionUtils";
+import { Transaction } from "../../types";
+import { formatAmount, formatDate } from "../../utils/transactionUtils";
 
 interface TransactionItemProps {
   transaction: Transaction;

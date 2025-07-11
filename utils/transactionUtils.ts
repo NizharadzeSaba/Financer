@@ -1,4 +1,4 @@
-import { Transaction, TransactionsStats } from "../api";
+import { Transaction, TransactionsStats } from "../types";
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString);

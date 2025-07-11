@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { queryClient } from "../../api";
-import { BudgetSettingsModal } from "../../components/BudgetSettingsModal";
-import { ErrorState } from "../../components/ErrorState";
-import { LoadingState } from "../../components/LoadingState";
+import {
+  BudgetSettingsModal,
+  ErrorState,
+  LoadingState,
+} from "../../components";
 import { useBudget } from "../../hooks/useBudget";
 import {
   calculateCategoryProgress,

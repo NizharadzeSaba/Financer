@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { BudgetSettings } from "../types/budget";
+import { BudgetSettings } from "../../types/budget";
 
 interface BudgetSettingsModalProps {
   visible: boolean;

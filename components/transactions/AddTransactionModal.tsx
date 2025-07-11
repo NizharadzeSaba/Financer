@@ -2,11 +2,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { queryKeys } from "../api";
+import { queryKeys } from "../../api";
 import {
   useCreateTransaction,
   useTransactionCategories,
-} from "../hooks/useTransactions";
+} from "../../hooks/useTransactions";
 
 interface AddTransactionModalProps {
   visible: boolean;

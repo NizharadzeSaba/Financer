@@ -1,11 +1,10 @@
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import { queryKeys, transactionsAPI } from "../api";
 import {
   CreateTransactionRequest,
-  queryKeys,
-  transactionsAPI,
   TransactionsResponse,
   TransactionsStats,
-} from "../api";
+} from "../types";
 
 export const useTransactions = (page: number = 1) => {
   return useQuery({

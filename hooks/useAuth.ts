@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { authAPI, queryKeys, SignInRequest, SignUpRequest } from "../api";
+import { authAPI, queryKeys } from "../api";
+import { SignInRequest, SignUpRequest } from "../types";
 
 export const useAuthState = () => {
   const [isLoading, setIsLoading] = useState(true);

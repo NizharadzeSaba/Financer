@@ -1,110 +1,18 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient } from "@tanstack/react-query";
 import type { DocumentPickerAsset } from "expo-document-picker";
+import {
+  AuthResponse,
+  Category,
+  CreateTransactionRequest,
+  SignInRequest,
+  SignUpRequest,
+  Transaction,
+  TransactionsResponse,
+  TransactionsStats,
+  User,
+} from "../types";
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface User {
-  id: number;
-  email: string;
-  name: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface SignUpRequest {
-  email: string;
-  password: string;
-  name: string;
-}
-
-export interface SignInRequest {
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  user: User;
-  access_token: string;
-}
-
-export interface Category {
-  id: number;
-  name: string;
-  description: string;
-  color: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Transaction {
-  id: number;
-  date: string;
-  description: string;
-  additionalInformation: string | null;
-  paidOut: string;
-  paidIn: string;
-  balance: string;
-  type: "income" | "expense";
-  documentDate: string | null;
-  documentNumber: string | null;
-  partnersAccount: string | null;
-  partnersName: string | null;
-  partnersTaxCode: string | null;
-  partnersBankCode: string | null;
-  intermediaryBankCode: string | null;
-  chargeDetails: string | null;
-  taxpayerCode: string | null;
-  taxpayerName: string | null;
-  treasuryCode: string | null;
-  opCode: string | null;
-  additionalDescription: string | null;
-  transactionId: string | null;
-  detectedCategory: string;
-  categoryId: number;
-  userId: number;
-  createdAt: string;
-  updatedAt: string;
-  category: Category;
-}
-
-export interface TransactionsResponse {
-  transactions: Transaction[];
-  total: number;
-  page: number;
-  totalPages: number;
-}
-
-export interface CreateTransactionRequest {
-  paidOut: number;
-  paidIn: number;
-  description: string;
-  category: string;
-  type: "income" | "expense";
-  date: string;
-  balance: number;
-}
-
-export interface TransactionsStats {
-  totalExpenses: number;
-  totalIncome: number;
-  expensesByCategory: {
-    category: string;
-    amount: number;
-    percentage: number;
-  }[];
-  monthlyTrends: {
-    month: string;
-    expenses: number;
-    income: number;
-  }[];
-}
-
-// ============================================================================
-// API CONFIGURATION
-// ============================================================================
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 export const queryClient = new QueryClient({
@@ -119,10 +27,6 @@ export const queryClient = new QueryClient({
     },
   },
 });
-
-// ============================================================================
-// API UTILITIES
-// ============================================================================
 
 const getAuthToken = async (): Promise<string | null> => {
   try {
@@ -204,10 +108,6 @@ const apiFetch = async <T>(
   }
 };
 
-// ============================================================================
-// AUTH API
-// ============================================================================
-
 export const authAPI = {
   signUp: async (data: SignUpRequest): Promise<AuthResponse> => {
     const response = await apiFetch<AuthResponse>("/auth/signup", {
@@ -238,10 +138,6 @@ export const authAPI = {
     queryClient.clear();
   },
 };
-
-// ============================================================================
-// TRANSACTIONS API
-// ============================================================================
 
 export const transactionsAPI = {
   getTransactions: async (page: number = 1): Promise<TransactionsResponse> => {
@@ -306,10 +202,6 @@ export const transactionsAPI = {
     return await apiFetch<Category[]>(`/transactions/categories/all`);
   },
 };
-
-// ============================================================================
-// QUERY KEYS
-// ============================================================================
 
 export const queryKeys = {
   auth: {
