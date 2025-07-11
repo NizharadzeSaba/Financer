@@ -1,3 +1,4 @@
+export { AddTransactionModal } from "./AddTransactionModal";
 export { BalanceCard } from "./BalanceCard";
 export { DashboardHeader } from "./DashboardHeader";
 export { DashboardTransactionItem } from "./DashboardTransactionItem";
@@ -5,6 +6,7 @@ export { EmptyState } from "./EmptyState";
 export { ErrorState } from "./ErrorState";
 export { LoadingState } from "./LoadingState";
 export { QuickActionButton } from "./QuickActionButton";
+export { QuickActions } from "./QuickActions";
 export { SectionHeader } from "./SectionHeader";
 export { TransactionItem } from "./TransactionItem";
 export { TransactionsContainer } from "./TransactionsContainer";

@@ -78,10 +78,13 @@ export interface TransactionsResponse {
 }
 
 export interface CreateTransactionRequest {
-  amount: number;
+  paidOut: number;
+  paidIn: number;
   description: string;
   category: string;
   type: "income" | "expense";
+  date: string;
+  balance: number;
 }
 
 export interface TransactionsStats {
@@ -297,6 +300,10 @@ export const transactionsAPI = {
         errorData.message || `Failed to import CSV for ${bankCode}`
       );
     }
+  },
+
+  getCategories: async (): Promise<Category[]> => {
+    return await apiFetch<Category[]>(`/transactions/categories/all`);
   },
 };
 

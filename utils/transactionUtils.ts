@@ -1,4 +1,4 @@
-import { Transaction } from "../api";
+import { Transaction, TransactionsStats } from "../api";
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -33,3 +33,37 @@ export const formatTransactionForDashboard = (transaction: Transaction) => {
     ),
   };
 };
+
+export function formatCurrency(amount: number | undefined): string {
+  if (amount == null) return "0.00";
+  return amount.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+export function formatDiff(diff: number | null): string {
+  if (diff == null) return "";
+  const sign = diff > 0 ? "+" : diff < 0 ? "−" : "";
+  return `${sign}₾${Math.abs(diff).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} this month`;
+}
+
+export function getMonthDiff(
+  stats: TransactionsStats | undefined,
+  type: "income" | "expense"
+): number | null {
+  if (!stats || !stats.monthlyTrends || stats.monthlyTrends.length < 2)
+    return null;
+  const trends = stats.monthlyTrends;
+  const current = trends[trends.length - 1];
+  const prev = trends[trends.length - 2];
+  if (!current || !prev) return null;
+  const diff =
+    type === "income"
+      ? current.income - prev.income
+      : current.expenses - prev.expenses;
+  return diff;
+}

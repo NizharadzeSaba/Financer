@@ -106,3 +106,11 @@ export const useTransaction = (id: number) => {
     enabled: !!id,
   });
 };
+
+export const useTransactionCategories = () => {
+  return useQuery({
+    queryKey: ["transactions", "categories"],
+    queryFn: () => transactionsAPI.getCategories(),
+    staleTime: 10 * 60 * 1000,
+  });
+};
